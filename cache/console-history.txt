@@ -1,0 +1,5 @@
+npx hardhat run scripts/deploy.js --network fuji
+ethers.utils.formatEther(await ethers.provider.get
+> (await ethers.provider.getBalance("0xb4Bbf9A9ca11B75A13418d307ecede3Ac281656B")).toString()
+npx hardhat console --network fuji
+(await ethers.getSigners())[0].address
