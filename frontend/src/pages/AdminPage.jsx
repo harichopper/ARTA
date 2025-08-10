@@ -20,10 +20,7 @@ export default function AdminPage() {
   const [txStatus, setTxStatus] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
 
-  // Cloudinary config
-  const CLOUDINARY_CLOUD_NAME = 'dsalogt8w';
-  const CLOUDINARY_UPLOAD_PRESET = 'ARTAtoken';
-  const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/upload`;
+
 
   useEffect(() => {
     if (window.ethereum) {
@@ -183,8 +180,8 @@ export default function AdminPage() {
             <label className="block mb-3 font-semibold text-lg">Description</label>
             <textarea name="description" value={formData.description} onChange={handleChange} className="w-full rounded-lg px-4 py-3 bg-slate-800" required />
           </div>
-          {/* Image */}
-          <div className="md:col-span-2">
+{/*           {/* Image */}
+{/*           <div className="md:col-span-2">
             <label className="block mb-3 font-semibold text-lg">Upload Image</label>
             <input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploadingImage} required />
             {uploadingImage && <p className="text-sm mt-2 text-cyan-400">Uploading image...</p>}
@@ -193,7 +190,7 @@ export default function AdminPage() {
                 <img src={formData.imageUrl} alt="Preview" className="mt-4 h-48 w-48 object-cover rounded-full border-4 border-cyan-400 shadow-lg" />
               </div>
             )}
-          </div>
+          </div> */} */}
           {/* Submit */}
           <div className="md:col-span-2 text-center mt-6">
             <button
