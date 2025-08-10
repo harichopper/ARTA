@@ -1,5 +1,9 @@
 import { ethers } from "ethers";
 
+const AVALANCHE_RPC = "https://api.avax-test.network/ext/bc/C/rpc"; // or mainnet RPC
+
+const provider = new ethers.providers.JsonRpcProvider(AVALANCHE_RPC);
+
 // Replace with your deployed contract address
 export const AUCTION_MANAGER_ADDRESS = "0x521F4F2540b4F66699AF08D196caBFACF40D24F8";
 
