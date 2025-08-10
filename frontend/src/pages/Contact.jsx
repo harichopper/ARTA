@@ -21,7 +21,7 @@ export default function Contact() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/contact', {
+      const response = await fetch('http://localhost:5000/api/contact','https://arta-frontend-65ui.vercel.app/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
