@@ -20,8 +20,6 @@ export default function AdminPage() {
   const [txStatus, setTxStatus] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
 
-
-
   useEffect(() => {
     if (window.ethereum) {
       const p = new ethers.providers.Web3Provider(window.ethereum);
@@ -46,12 +44,20 @@ export default function AdminPage() {
   }, []);
 
   useEffect(() => {
-    const requiredFields = ['name', 'seller', 'startingBid', 'duration', 'description',];
+    const requiredFields = ['name', 'seller', 'startingBid', 'duration', 'description'];
     const allFilled = requiredFields.every(field => formData[field]?.toString().trim() !== '');
     setIsValid(allFilled);
   }, [formData]);
 
-  
+  // *** ADDED handleChange function ***
+  const handleChange = e => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
   const connectWallet = async () => {
     if (!window.ethereum) {
       Swal.fire('Error', 'Please install MetaMask', 'error');
@@ -120,30 +126,68 @@ export default function AdminPage() {
           {/* Name */}
           <div>
             <label className="block mb-3 font-semibold text-lg">Name</label>
-            <input type="text" name="name" value={formData.name} onChange={handleChange} className="w-full rounded-lg px-4 py-3 bg-slate-800" required />
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              className="w-full rounded-lg px-4 py-3 bg-slate-800"
+              required
+            />
           </div>
           {/* Seller */}
           <div>
             <label className="block mb-3 font-semibold text-lg">Seller</label>
-            <input type="text" name="seller" value={formData.seller} onChange={handleChange} className="w-full rounded-lg px-4 py-3 bg-slate-800" required />
+            <input
+              type="text"
+              name="seller"
+              value={formData.seller}
+              onChange={handleChange}
+              className="w-full rounded-lg px-4 py-3 bg-slate-800"
+              required
+            />
           </div>
           {/* Starting Bid */}
           <div>
             <label className="block mb-3 font-semibold text-lg">Starting Bid (ETH)</label>
-            <input type="number" name="startingBid" value={formData.startingBid} onChange={handleChange} min="0" step="0.01" className="w-full rounded-lg px-4 py-3 bg-slate-800" required />
+            <input
+              type="number"
+              name="startingBid"
+              value={formData.startingBid}
+              onChange={handleChange}
+              min="0"
+              step="0.01"
+              className="w-full rounded-lg px-4 py-3 bg-slate-800"
+              required
+            />
           </div>
           {/* Duration */}
           <div>
             <label className="block mb-3 font-semibold text-lg">Duration (seconds)</label>
-            <input type="number" name="duration" value={formData.duration} onChange={handleChange} min="1" className="w-full rounded-lg px-4 py-3 bg-slate-800" required />
+            <input
+              type="number"
+              name="duration"
+              value={formData.duration}
+              onChange={handleChange}
+              min="1"
+              className="w-full rounded-lg px-4 py-3 bg-slate-800"
+              required
+            />
           </div>
           {/* Description */}
           <div className="md:col-span-2">
             <label className="block mb-3 font-semibold text-lg">Description</label>
-            <textarea name="description" value={formData.description} onChange={handleChange} className="w-full rounded-lg px-4 py-3 bg-slate-800" required />
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              className="w-full rounded-lg px-4 py-3 bg-slate-800"
+              required
+            />
           </div>
-          {/* Image */}
-{/*           <div className="md:col-span-2">
+          {/* Image Upload (commented out in your code) */}
+          {/* 
+          <div className="md:col-span-2">
             <label className="block mb-3 font-semibold text-lg">Upload Image</label>
             <input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploadingImage} required />
             {uploadingImage && <p className="text-sm mt-2 text-cyan-400">Uploading image...</p>}
@@ -152,14 +196,15 @@ export default function AdminPage() {
                 <img src={formData.imageUrl} alt="Preview" className="mt-4 h-48 w-48 object-cover rounded-full border-4 border-cyan-400 shadow-lg" />
               </div>
             )}
-          </div> */}
-          {/* Submit */}
+          </div> 
+          */}
+          {/* Submit Button */}
           <div className="md:col-span-2 text-center mt-6">
             <button
               type="submit"
               disabled={!isValid || !account || !!txStatus}
               className={`w-full md:w-1/3 py-4 font-bold rounded-full shadow-lg transition-transform ${
-                isValid && account && !txStatus 
+                isValid && account && !txStatus
                   ? 'bg-gradient-to-r from-purple-600 to-cyan-600 hover:scale-105'
                   : 'bg-gray-600 text-gray-300 cursor-not-allowed'
               }`}
