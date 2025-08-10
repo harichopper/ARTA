@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 
 // Replace with your deployed contract address (update this if you redeploy!)
-export const AUCTION_MANAGER_ADDRESS = "0xa5fEBfE734cF2bb204668A279e759005cfc966FF";
+export const AUCTION_MANAGER_ADDRESS = "0x2e75c10241d0846c025A0A580c004e4BEdb24d7b";
 
 export const AUCTION_MANAGER_ABI = [
   {
