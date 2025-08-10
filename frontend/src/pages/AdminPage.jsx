@@ -190,7 +190,7 @@ export default function AdminPage() {
                 <img src={formData.imageUrl} alt="Preview" className="mt-4 h-48 w-48 object-cover rounded-full border-4 border-cyan-400 shadow-lg" />
               </div>
             )}
-          </div> */} */}
+          </div> */} 
           {/* Submit */}
           <div className="md:col-span-2 text-center mt-6">
             <button
