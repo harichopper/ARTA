@@ -1,53 +1,57 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const bodyParser = require('body-parser');
+import express from 'express';
+import cors from 'cors';
+import mongoose from 'mongoose';
 
 const app = express();
+const port = process.env.PORT || 5000;
 
-// Middleware
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 
-// Connect MongoDB
-const MONGO_URI = 'your-mongodb-connection-string-here'; // Replace with your actual MongoDB URI
-mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.log('MongoDB connection error:', err));
+mongoose.connect('mongodb+srv://haricdonh:hari5678@cluster0.asyp365.mongodb.net/your_db_name', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
-// User Schema and Model
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+db.once('open', () => console.log('Connected to MongoDB'));
+
+// User schema with walletAddress and role
 const userSchema = new mongoose.Schema({
-  username: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-}, { timestamps: true });
+  walletAddress: { type: String, unique: true, required: true },
+  role: { type: String, enum: ['admin', 'user'], default: 'user' },
+});
 
 const User = mongoose.model('User', userSchema);
 
-// Registration route
-app.post('/api/register', async (req, res) => {
+// Sample seed route to create users (optional)
+// Use once, then comment or remove
+app.post('/api/seed-user', async (req, res) => {
   try {
-    const { username, email, password } = req.body;
-
-    // Basic validation (you can improve)
-    if (!username || !email || !password) {
-      return res.status(400).json({ message: 'Please provide all required fields.' });
-    }
-
-    // Check if user exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) return res.status(400).json({ message: 'Email already registered.' });
-
-    // Save user (for demo, password saved as plain text - **DO NOT DO THIS IN PROD**)
-    const newUser = new User({ username, email, password });
-    await newUser.save();
-
-    res.status(201).json({ message: 'User registered successfully!' });
+    const { walletAddress, role } = req.body;
+    const user = new User({ walletAddress: walletAddress.toLowerCase(), role });
+    await user.save();
+    res.json({ message: 'User seeded', user });
   } catch (error) {
-    console.error('Registration error:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ error: error.message });
   }
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// Get user by wallet address
+app.get('/api/users/:walletAddress', async (req, res) => {
+  try {
+    const walletAddress = req.params.walletAddress.toLowerCase();
+    const user = await User.findOne({ walletAddress });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});

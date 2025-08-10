@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowRight, MapPin, Phone, Mail } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 
 export default function Home() {
@@ -18,17 +19,43 @@ export default function Home() {
     { id: 7, name: 'Smart Companion', price: 230, image: 'https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=400&h=400&fit=crop&crop=center', badge: 'New', rating: 4.6 },
   ];
 
-  const features = [
-    { icon: '🏃', title: 'Fitness Tracking', description: 'Monitor your health and fitness goals with precision tracking.' },
-    { icon: '🔔', title: 'Alerts & Notifications', description: 'Stay connected with smart notifications and alerts.' },
-    { icon: '💬', title: 'Messages', description: 'Read and respond to messages directly from your wrist.' },
-    { icon: '📶', title: 'Bluetooth', description: 'Seamless connectivity with all your favorite devices.' },
-  ];
+    const features = [
+    {
+        icon: '⏳',
+        title: 'Real-Time Bidding',
+        description: 'Place and track bids instantly with low latency on the Avalanche network.',
+    },
+    {
+        icon: '🔒',
+        title: 'Secure Transactions',
+        description: 'All bids and payments are secured with blockchain technology ensuring transparency.',
+    },
+    {
+        icon: '📈',
+        title: 'Live Auction Dashboard',
+        description: 'Monitor auction status, highest bids, and bidder activity in real-time.',
+    },
+    {
+        icon: '🌐',
+        title: 'Global Access',
+        description: 'Participate in auctions anytime, anywhere with a decentralized platform.',
+    },
+    ];
 
-  const testimonials = [
-    { name: 'Mark Thomas', role: 'Customer', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face', text: 'Amazing quality and features! This smartwatch has transformed how I track my fitness goals.' },
-    { name: 'Alina Hans', role: 'Customer', avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=80&h=80&fit=crop&crop=face', text: 'Love the sleek design and battery life. Perfect companion for my busy lifestyle.' },
-  ];
+    const testimonials = [
+    {
+        name: 'Mark Thomas',
+        role: 'Bidder',
+        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face',
+        text: 'The real-time bidding on Avalanche is lightning fast and transparent. I won my favorite auction with ease!',
+    },
+    {
+        name: 'Alina Hans',
+        role: 'Seller',
+        avatar: 'https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?cs=srgb&dl=pexels-italo-melo-881954-2379004.jpg',
+        text: 'Selling my items through this platform was seamless and secure. Highly recommend for anyone wanting trustworthy auctions.',
+    },
+    ];
 
     const slides = [
     {
@@ -85,7 +112,7 @@ return(
                         <div className="w-80 h-80 mx-auto relative">
                         <div className="absolute inset-0 bg-gradient-to-br from-purple-400 to-cyan-400 rounded-full animate-pulse opacity-20"></div>
                         <img
-                            src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop&crop=center"
+                            src="https://cdn3d.iconscout.com/3d/premium/thumb/crypto-auction-9043423-7402472.png"
                             alt="Smartwatch"
                             className="w-full h-full object-contain relative z-10 filter drop-shadow-2xl rounded-full"
                         />
@@ -114,8 +141,8 @@ return(
                     <div className="grid md:grid-cols-2 gap-12 items-center">
                     <div className="relative">
                         <img
-                        src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=500&h=400&fit=crop&crop=center"
-                        alt="About us"
+                        src="https://fineartshippers.com/wp-content/uploads/2024/12/three-respectable-large-auction-houses-with-locations-in-nyc.jpg"
+                        alt="About Avalanche Auction"
                         className="rounded-2xl shadow-2xl"
                         />
                         <div className="absolute inset-0 bg-gradient-to-tr from-purple-600/20 to-cyan-600/20 rounded-2xl"></div>
@@ -123,21 +150,24 @@ return(
                     <div className="text-white">
                         <h2 className="text-4xl md:text-5xl font-bold mb-6">About Us</h2>
                         <p className="text-lg text-gray-300 mb-8 leading-relaxed">
-                        We're passionate about creating innovative smartwatches that seamlessly blend cutting-edge technology with elegant design. Our mission is to empower individuals to live healthier, more connected lives through wearable technology that adapts to their unique lifestyle.
+                        We are dedicated to revolutionizing auctions with real-time, blockchain-powered bidding on Avalanche. Our platform ensures transparency, speed, and security, empowering bidders worldwide to participate seamlessly in dynamic auctions.
                         </p>
                         <div className="grid grid-cols-2 gap-6 mb-8">
                         <div className="text-center">
                             <div className="text-3xl font-bold text-purple-400 mb-2">10K+</div>
-                            <div className="text-gray-400">Happy Customers</div>
+                            <div className="text-gray-400">Active Bidders</div>
                         </div>
                         <div className="text-center">
-                            <div className="text-3xl font-bold text-purple-400 mb-2">50+</div>
-                            <div className="text-gray-400">Watch Models</div>
+                            <div className="text-3xl font-bold text-purple-400 mb-2">100+</div>
+                            <div className="text-gray-400">Live Auctions</div>
                         </div>
                         </div>
-                        <button className="bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 px-8 py-4 rounded-full text-white font-semibold transition-all duration-300 transform hover:scale-105 flex items-center gap-2">
+                        {/* <button
+                        className="bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 px-8 py-4 rounded-full text-white font-semibold transition-all duration-300 transform hover:scale-105 flex items-center gap-2"
+                        onClick={() => navigate('/about')}
+                        >
                         Read More <ArrowRight size={20} />
-                        </button>
+                        </button> */}
                     </div>
                     </div>
                 </div>
@@ -147,9 +177,9 @@ return(
                 <section className="py-20 bg-black/20">
                 <div className="container mx-auto px-6">
                     <div className="text-center mb-16">
-                    <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">Features Of Our Watches</h2>
+                    <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">Features of Our Real-Time Auction Platform</h2>
                     <p className="text-lg text-gray-400 max-w-2xl mx-auto">
-                        Discover the advanced features that make our smartwatches the perfect companion for your daily life.
+                        Explore the cutting-edge features that empower you to participate confidently in live auctions on Avalanche.
                     </p>
                     </div>
 

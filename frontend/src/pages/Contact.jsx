@@ -10,15 +10,33 @@ export default function Contact() {
   });
 
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // You can integrate form submission logic here (API call, email, etc)
-    setSubmitted(true);
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch('http://localhost:5000/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) throw new Error('Failed to send message');
+
+      setSubmitted(true);
+      setFormData({ name: '', email: '', subject: '', message: '' }); // Clear form
+    } catch (error) {
+      alert('Failed to send message, please try again.');
+      console.error(error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -90,7 +108,8 @@ export default function Contact() {
 
             <button
               type="submit"
-              className="inline-flex items-center gap-3 px-12 py-4 rounded-full bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 text-white font-semibold transition transform hover:scale-105 shadow-lg mx-auto"
+              disabled={isSubmitting}
+              className="inline-flex items-center gap-3 px-12 py-4 rounded-full bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 text-white font-semibold transition transform hover:scale-105 shadow-lg mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label="Send Message"
             >
               Send Message <Send size={22} />

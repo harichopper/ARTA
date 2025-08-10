@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
 import LiveAuctions from './pages/LiveAuctions';
 import UpcomingAuctions from './pages/UpcomingAuctions';
 import PastAuctions from './pages/PastAuctions';
@@ -10,9 +10,145 @@ import Contact from './pages/Contact';
 import Login from './pages/login';
 import Register from './pages/register';
 import AdminPage from './pages/AdminPage';
+
 // ethers v6 import
 import { ethers } from 'ethers';
 import { AUCTION_MANAGER_ABI, AUCTION_MANAGER_ADDRESS } from './utils/contract';
+
+// Profile component
+function Profile() {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState(null);
+  const [role, setRole] = useState(null);
+
+  useEffect(() => {
+    const storedRole = sessionStorage.getItem('mode');
+    const storedEmail = sessionStorage.getItem('email');
+
+    if (storedRole === 'admin') {
+      navigate('/admin', { replace: true });
+    } else if (storedRole === 'user') {
+      setRole('user');
+      setEmail(storedEmail);
+    } else {
+      navigate('/login', { replace: true });
+    }
+  }, [navigate]);
+
+  if (role !== 'user') {
+    return null;
+  }
+
+  return (
+    <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-black p-6">
+      <div className="bg-gradient-to-tr from-purple-700 to-indigo-600 rounded-xl shadow-2xl p-8 max-w-md w-full text-white">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="bg-purple-900 rounded-full p-4 shadow-lg">
+            {/* User Icon */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-16 w-16 text-indigo-300"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M16 14a4 4 0 01-8 0m8 0a4 4 0 00-8 0m8 0v1a4 4 0 01-8 0v-1m8 0V8a4 4 0 10-8 0v6"
+              />
+            </svg>
+          </div>
+
+          <h1 className="text-4xl font-extrabold tracking-wide">Welcome!</h1>
+
+          <p className="text-indigo-100 text-center text-lg">
+            <span className="font-semibold">Email:</span>{' '}
+            <span className="text-indigo-200 break-all">{email}</span>
+          </p>
+
+          <p className="text-indigo-200 text-center max-w-xs">
+            This is your personal profile page. Feel free to update your information and explore your dashboard.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Account Dropdown with Logout
+function AccountDropdown() {
+  const [open, setOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  const navigate = useNavigate();
+
+  // Close dropdown if clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    sessionStorage.removeItem('mode');
+    sessionStorage.removeItem('email');
+    setOpen(false);
+    navigate('/login', { replace: true });
+  };
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-3 hover:text-cyan-400 transition-colors duration-300"
+        aria-haspopup="true"
+        aria-expanded={open}
+        aria-label="Account menu"
+      >
+        <User size={24} />
+        <span>Account</span>
+        <svg
+          className={`w-4 h-4 ml-1 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none" viewBox="0 0 24 24" stroke="currentColor"
+          aria-hidden="true"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {open && (
+        <div className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg border border-gray-200 z-50">
+          <Link
+            to="/profile"
+            className="block px-4 py-2 text-gray-800 hover:bg-cyan-100 hover:text-cyan-700 transition"
+            onClick={() => setOpen(false)}
+          >
+            My Profile
+          </Link>
+          <Link
+            to="/login"
+            className="block px-4 py-2 text-gray-800 hover:bg-cyan-100 hover:text-cyan-700 transition"
+            onClick={() => setOpen(false)}
+          >
+            Login
+          </Link>
+          <button
+            onClick={handleLogout}
+            className="w-full text-left px-4 py-2 text-gray-800 hover:bg-red-100 hover:text-red-600 transition font-semibold"
+          >
+            Logout
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function App() {
   const [account, setAccount] = useState(null);
@@ -83,7 +219,6 @@ function App() {
     window.ethereum.on('accountsChanged', handleAccountsChanged);
     window.ethereum.on('chainChanged', handleChainChanged);
 
-    // Cleanup on unmount
     return () => {
       window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
       window.ethereum.removeListener('chainChanged', handleChainChanged);
@@ -121,28 +256,47 @@ function App() {
 
         {/* Social Media Bar */}
         <div className="fixed left-4 top-1/2 transform -translate-y-1/2 z-50 hidden lg:flex flex-col gap-4">
-          {[Facebook, Twitter, Linkedin, Instagram].map((Icon, idx) => (
+          {[
+            { Icon: Facebook, url: "https://facebook.com/", label: "Facebook" },
+            { Icon: Twitter, url: "https://twitter.com/", label: "Twitter" },
+            { Icon: Linkedin, url: "https://linkedin.com/", label: "LinkedIn" },
+            { Icon: Instagram, url: "https://instagram.com/", label: "Instagram" },
+          ].map(({ Icon, url, label }, idx) => (
             <a
               key={idx}
-              href="#"
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
               className="p-3 bg-white/10 rounded-full hover:bg-purple-600 transition duration-300"
-              aria-label={`Link to ${Icon.displayName || 'social media'}`}
+              aria-label={`Link to ${label}`}
             >
               <Icon size={20} />
             </a>
           ))}
         </div>
 
+
         {/* Header */}
         <header className="fixed top-0 w-full bg-black/20 backdrop-blur-md z-40 border-b border-white/10">
-          <nav className="container mx-auto px-6 py-4 flex items-center justify-between">
-            <div className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
-              Timups
-            </div>
-
+        <nav className="container mx-auto px-6 py-4 flex items-center justify-between">
+       
             {/* Desktop Nav */}
+                {/* Logo + Name */}
+      <div className="flex items-center space-x-3">
+        <img
+          src="/logo.png" // <-- put your logo file inside /public
+          alt="ARTA Logo"
+          className="h-16 w-16 object-contain"
+        />
+        <span className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
+          ARTA
+        </span>
+      </div>
+
             <div className="hidden md:flex items-center gap-8">
-              <Link to="/" className="hover:text-purple-400 transition">Home</Link>
+              <Link to="/" className="hover:text-purple-400 transition">
+                Home
+              </Link>
 
               {/* Auctions Dropdown */}
               <div className="relative group">
@@ -153,7 +307,14 @@ function App() {
                   aria-controls="desktop-auctions-menu"
                 >
                   Auctions
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    aria-hidden="true"
+                  >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
@@ -163,29 +324,34 @@ function App() {
                   role="menu"
                   aria-label="Auctions submenu"
                 >
-                  <Link to="/past-auctions" className="block px-4 py-2 text-gray-800 hover:bg-purple-100" role="menuitem">Previous Auction</Link>
-                  <Link to="/live-auctions" className="block px-4 py-2 text-gray-800 hover:bg-purple-100" role="menuitem">Live Auction</Link>
-                  <Link to="/upcoming-auctions" className="block px-4 py-2 text-gray-800 hover:bg-purple-100" role="menuitem">Upcoming Auction</Link>
+                  <Link to="/past-auctions" className="block px-4 py-2 text-gray-800 hover:bg-purple-100" role="menuitem">
+                    Previous Auction
+                  </Link>
+                  <Link to="/live-auctions" className="block px-4 py-2 text-gray-800 hover:bg-purple-100" role="menuitem">
+                    Live Auction
+                  </Link>
+                  {/* <Link to="/upcoming-auctions" className="block px-4 py-2 text-gray-800 hover:bg-purple-100" role="menuitem">
+                    Upcoming Auction
+                  </Link> */}
                 </div>
               </div>
 
-              <Link to="/about" className="hover:text-purple-400 transition">About</Link>
-              <Link to="/contact" className="hover:text-purple-400 transition">Contact</Link>
+              <Link to="/about" className="hover:text-purple-400 transition">
+                About
+              </Link>
+              <Link to="/contact" className="hover:text-purple-400 transition">
+                Contact
+              </Link>
             </div>
 
             {/* Icons and Mobile menu toggle */}
-            <div className="flex items-center gap-6 text-white text-lg md:text-xl font-semibold">
-              <Link
-                to="/login"
-                className="flex items-center gap-3 hover:text-cyan-400 transition-colors duration-300"
-              >
-                <User size={24} />
-                <span>Account</span>
-              </Link>
+            <div className="flex items-center gap-6 text-white text-lg md:text-sm font-semibold">
+              {/* Use AccountDropdown here */}
+              <AccountDropdown />
 
               {/* Connect Wallet Button */}
               {account ? (
-                <div className="flex items-center gap-2 bg-green-600/20 border border-green-500/30 rounded-lg px-3 py-2">
+                <div className="flex items-center gap-2 bg-green-600/20 border border-green-500/30 rounded-lg px-3 py-2 text-sm">
                   <CheckCircle size={16} className="text-green-400" />
                   <span className="text-sm font-medium">{shortenAddress(account)}</span>
                   <button
@@ -223,7 +389,9 @@ function App() {
           {/* Mobile Menu */}
           {isMenuOpen && (
             <div className="md:hidden bg-black/80 py-4">
-              <Link to="/" className="block px-6 py-2 hover:text-purple-400" onClick={() => setIsMenuOpen(false)}>Home</Link>
+              <Link to="/" className="block px-6 py-2 hover:text-purple-400" onClick={() => setIsMenuOpen(false)}>
+                Home
+              </Link>
 
               <button
                 onClick={() => setIsAuctionsOpen(!isAuctionsOpen)}
@@ -232,18 +400,25 @@ function App() {
                 aria-controls="mobile-auctions-submenu"
                 aria-haspopup="true"
               >
-                Auctions <span className={isAuctionsOpen ? "rotate-180" : ""}>▼</span>
+                Auctions <span className={isAuctionsOpen ? 'rotate-180' : ''}>▼</span>
               </button>
               {isAuctionsOpen && (
                 <div id="mobile-auctions-submenu" className="pl-8">
-                  <Link to="/past-auctions" className="block py-2 hover:text-purple-400" onClick={() => setIsMenuOpen(false)}>Previous Auction</Link>
-                  <Link to="/live-auctions" className="block py-2 hover:text-purple-400" onClick={() => setIsMenuOpen(false)}>Live Auction</Link>
-                  <Link to="/upcoming-auctions" className="block py-2 hover:text-purple-400" onClick={() => setIsMenuOpen(false)}>Upcoming Auction</Link>
+                  <Link to="/past-auctions" className="block py-2 hover:text-purple-400" onClick={() => setIsMenuOpen(false)}>
+                    Previous Auction
+                  </Link>
+                  <Link to="/live-auctions" className="block py-2 hover:text-purple-400" onClick={() => setIsMenuOpen(false)}>
+                    Live Auction
+                  </Link>
                 </div>
               )}
 
-              <Link to="/about" className="block px-6 py-2 hover:text-purple-400" onClick={() => setIsMenuOpen(false)}>About</Link>
-              <Link to="/contact" className="block px-6 py-2 hover:text-purple-400" onClick={() => setIsMenuOpen(false)}>Contact</Link>
+              <Link to="/about" className="block px-6 py-2 hover:text-purple-400" onClick={() => setIsMenuOpen(false)}>
+                About
+              </Link>
+              <Link to="/contact" className="block px-6 py-2 hover:text-purple-400" onClick={() => setIsMenuOpen(false)}>
+                Contact
+              </Link>
 
               {/* Mobile Wallet */}
               <div className="px-6 py-4 border-t border-white/10 mt-2 pt-4">
@@ -278,13 +453,14 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/live-auctions" element={<LiveAuctions />} />
-            <Route path="/upcoming-auctions" element={<UpcomingAuctions />} />
+            {/* <Route path="/upcoming-auctions" element={<UpcomingAuctions />} /> */}
             <Route path="/past-auctions" element={<PastAuctions />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/admin" element={<AdminPage />} />
+            <Route path="/profile" element={<Profile />} />
           </Routes>
         </main>
 

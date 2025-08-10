@@ -28,28 +28,28 @@ const teamMembers = [
   },
 ];
 
-const coreValues = [
-  {
-    icon: '💡',
-    title: 'Innovation',
-    description: 'We strive to push the boundaries of wearable technology.',
-  },
-  {
-    icon: '🤝',
-    title: 'Customer Focus',
-    description: 'Your needs and satisfaction are our top priorities.',
-  },
-  {
-    icon: '🔒',
-    title: 'Quality & Security',
-    description: 'We ensure reliable and secure products you can trust.',
-  },
-  {
-    icon: '🌱',
-    title: 'Sustainability',
-    description: 'Committed to environmentally responsible practices.',
-  },
-];
+  const coreValues = [
+    {
+      icon: '⚡',
+      title: 'Real-Time Speed',
+      description: 'Experience lightning-fast auctions powered by Avalanche’s cutting-edge blockchain technology.',
+    },
+    {
+      icon: '🤝',
+      title: 'Trust & Transparency',
+      description: 'Every bid and transaction is securely recorded, ensuring fairness and transparency for all users.',
+    },
+    {
+      icon: '🔒',
+      title: 'Security First',
+      description: 'Your assets and data are protected with top-tier blockchain security protocols.',
+    },
+    {
+      icon: '🌍',
+      title: 'Open Network',
+      description: 'Empowering users globally with decentralized auctions free from intermediaries.',
+    },
+  ];
 
 export default function About() {
   return (
@@ -60,9 +60,9 @@ export default function About() {
     About <span className="text-purple-400">Timups</span>
   </h1>
   <p className="text-lg md:text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed italic tracking-wide">
-    Discover our journey of innovation and passion in crafting wearable technology designed to elevate your lifestyle.
-  </p>
-        </header>
+    Discover our journey of innovation and passion in building a seamless, secure, and lightning-fast real-time auction platform on Avalanche blockchain designed to empower your bidding experience.
+  </p>   
+  </header>
 
 
         {/* Story and Mission */}
@@ -78,36 +78,28 @@ export default function About() {
         </div>
 
         <div>
-            <h2 className="text-4xl md:text-5xl font-extrabold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">
+            <h2 className="text-4xl md:text-4xl font-extrabold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">
             Our Journey &amp; Vision
             </h2>
 
             <p className="text-gray-300 mb-6 leading-relaxed text-lg">
-            At Timups, innovation drives us. We blend advanced technology with timeless craftsmanship to build smartwatches that empower your health and connectivity.
+At Avalanche Auction, innovation drives us. We combine cutting-edge blockchain technology with real-time data to create a fast, secure, and transparent auction platform.
             </p>
 
             <p className="text-gray-300 mb-8 leading-relaxed text-lg">
-            Our commitment is to seamless experiences, durability, and elegance — making your wrist the gateway to a smarter lifestyle.
+          Our mission is to empower bidders and sellers worldwide with seamless, trustworthy experiences — redefining the future of online auctions.
             </p>
 
-            <div className="flex gap-12 mb-12">
+          <div className="flex gap-12 mb-12">
             <div className="text-center">
-                <div className="text-5xl font-extrabold text-purple-500 mb-1">10K+</div>
-                <p className="text-gray-400 uppercase tracking-wide text-sm">Happy Customers</p>
+              <div className="text-5xl font-extrabold text-purple-500 mb-1">5K+</div>
+              <p className="text-gray-400 uppercase tracking-wide text-sm">Active Bidders</p>
             </div>
             <div className="text-center">
-                <div className="text-5xl font-extrabold text-cyan-400 mb-1">50+</div>
-                <p className="text-gray-400 uppercase tracking-wide text-sm">Watch Models</p>
+              <div className="text-5xl font-extrabold text-cyan-400 mb-1">200+</div>
+              <p className="text-gray-400 uppercase tracking-wide text-sm">Live Auctions</p>
             </div>
-            </div>
-
-            <button
-            className="inline-flex items-center gap-3 px-10 py-4 rounded-full bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 text-white font-semibold transition transform hover:scale-105 shadow-lg"
-            onClick={() => alert('Discover more about Timups')}
-            aria-label="Discover more about Timups"
-            >
-            Discover More <ArrowRight size={22} />
-            </button>
+          </div>
         </div>
         </section>
 

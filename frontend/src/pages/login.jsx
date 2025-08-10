@@ -22,6 +22,8 @@ export default function Login() {
           timer: 1500,
           showConfirmButton: false,
         });
+        sessionStorage.setItem('mode', 'admin');
+        sessionStorage.removeItem('email');
         navigate('/admin');
       } else {
         Swal.fire({
@@ -31,15 +33,21 @@ export default function Login() {
         });
       }
     } else {
-      // User login logic - just show success popup here
+      // User login logic
       await Swal.fire({
         icon: 'success',
         title: 'Logged In',
-        html: `Email: <strong>${emailOrName}</strong><br>Password: <strong>${'*'.repeat(password.length)}</strong>`,
+        html: `Email: <strong>${emailOrName}</strong>`,
         timer: 2000,
         showConfirmButton: false,
       });
-      // You can add user redirection logic here if needed
+
+      // Save user info in sessionStorage
+      sessionStorage.setItem('mode', 'user');
+      sessionStorage.setItem('email', emailOrName);
+
+      // Redirect or do something else here if needed
+      // For example, navigate('/user-dashboard');
     }
   };
 
