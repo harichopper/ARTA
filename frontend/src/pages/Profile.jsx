@@ -6,7 +6,7 @@ function Profile({ account }) {
   const [error, setError] = useState('');
 
   // Backend API URL to fetch user profile by wallet address
-  const API_URL = 'https://your-backend-api.com/api/users'; // Change this to your backend endpoint
+  const API_URL = 'https://arta-frontend-65ui.vercel.app/api/users'; // Change this to your backend endpoint
 
   useEffect(() => {
     if (!account) return;
