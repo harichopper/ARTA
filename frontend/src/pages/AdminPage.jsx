@@ -20,10 +20,7 @@ export default function AdminPage() {
   const [txStatus, setTxStatus] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
 
-  // Cloudinary config
-  const CLOUDINARY_CLOUD_NAME = 'dsalogt8w';
-  const CLOUDINARY_UPLOAD_PRESET = 'ARTAtoken';
-  const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/upload`;
+
 
   useEffect(() => {
     if (window.ethereum) {
@@ -49,50 +46,12 @@ export default function AdminPage() {
   }, []);
 
   useEffect(() => {
-    const requiredFields = ['name', 'seller', 'startingBid', 'duration', 'description', 'imageUrl'];
+    const requiredFields = ['name', 'seller', 'startingBid', 'duration', 'description',];
     const allFilled = requiredFields.every(field => formData[field]?.toString().trim() !== '');
     setIsValid(allFilled);
   }, [formData]);
 
-  const handleChange = e => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
-  };
-
-  const handleImageUpload = async e => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setUploadingImage(true);
-
-    const formDataCloudinary = new FormData();
-    formDataCloudinary.append('file', file);
-    formDataCloudinary.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-
-    try {
-      const response = await fetch(CLOUDINARY_URL, {
-        method: 'POST',
-        body: formDataCloudinary,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error?.message || 'Failed to upload image');
-      }
-
-      const data = await response.json();
-      if (data.secure_url) {
-        setFormData(prev => ({ ...prev, imageUrl: data.secure_url }));
-        Swal.fire('Success', 'Image uploaded successfully', 'success');
-      } else {
-        throw new Error('Failed to upload image');
-      }
-    } catch (error) {
-      console.error('Image upload error:', error);
-      Swal.fire('Error', `Image upload failed: ${error.message}`, 'error');
-    } finally {
-      setUploadingImage(false);
-    }
-  };
-
+  
   const connectWallet = async () => {
     if (!window.ethereum) {
       Swal.fire('Error', 'Please install MetaMask', 'error');
