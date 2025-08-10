@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 
 // Replace with your deployed contract address
-export const AUCTION_MANAGER_ADDRESS = "0x078B1D4f17BAdcdB99d2Ba5ba27d9D6835c93DCe";
+export const AUCTION_MANAGER_ADDRESS = "0xD2C17a53D96304c760B87dAC830E20e6D2a82d0a";
 
 // ABI extracted from AuctionManager.sol
 export const AUCTION_MANAGER_ABI = [
