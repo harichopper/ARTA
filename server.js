@@ -13,6 +13,10 @@ mongoose.connect('mongodb+srv://haricdonh:hari5678@cluster0.asyp365.mongodb.net/
   useUnifiedTopology: true,
 });
 
+app.get('/', (req, res) => {
+  res.send('Backend is running!');
+});
+
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 db.once('open', () => console.log('Connected to MongoDB'));
