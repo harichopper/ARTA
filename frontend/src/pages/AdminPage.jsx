@@ -10,6 +10,7 @@ export default function AdminPage() {
     startingBid: '',
     duration: '',
     description: '',
+    imageUrl: '',
   });
 
   const [account, setAccount] = useState('');
@@ -17,6 +18,12 @@ export default function AdminPage() {
   const [provider, setProvider] = useState(null);
   const [contract, setContract] = useState(null);
   const [txStatus, setTxStatus] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  // Cloudinary config
+  const CLOUDINARY_CLOUD_NAME = 'dsalogt8w';
+  const CLOUDINARY_UPLOAD_PRESET = 'ARTAtoken';
+  const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/upload`;
 
   useEffect(() => {
     if (window.ethereum) {
@@ -42,13 +49,48 @@ export default function AdminPage() {
   }, []);
 
   useEffect(() => {
-    const requiredFields = ['name', 'seller', 'startingBid', 'duration', 'description'];
+    const requiredFields = ['name', 'seller', 'startingBid', 'duration', 'description', 'imageUrl'];
     const allFilled = requiredFields.every(field => formData[field]?.toString().trim() !== '');
     setIsValid(allFilled);
   }, [formData]);
 
   const handleChange = e => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleImageUpload = async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingImage(true);
+
+    const formDataCloudinary = new FormData();
+    formDataCloudinary.append('file', file);
+    formDataCloudinary.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+    try {
+      const response = await fetch(CLOUDINARY_URL, {
+        method: 'POST',
+        body: formDataCloudinary,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || 'Failed to upload image');
+      }
+
+      const data = await response.json();
+      if (data.secure_url) {
+        setFormData(prev => ({ ...prev, imageUrl: data.secure_url }));
+        Swal.fire('Success', 'Image uploaded successfully', 'success');
+      } else {
+        throw new Error('Failed to upload image');
+      }
+    } catch (error) {
+      console.error('Image upload error:', error);
+      Swal.fire('Error', `Image upload failed: ${error.message}`, 'error');
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const connectWallet = async () => {
@@ -82,12 +124,14 @@ export default function AdminPage() {
       const signer = provider.getSigner();
       const contractWithSigner = contract.connect(signer);
 
+      // Assuming contract ABI is updated: createAuction(name, seller, startingBid, duration, description, imageUrl)
       const tx = await contractWithSigner.createAuction(
         formData.name,
         formData.seller,
         ethers.utils.parseEther(formData.startingBid.toString()),
         durationSeconds,
-        formData.description
+        formData.description,
+        formData.imageUrl
       );
 
       await tx.wait();
@@ -100,6 +144,7 @@ export default function AdminPage() {
         startingBid: '',
         duration: '',
         description: '',
+        imageUrl: '',
       });
     } catch (err) {
       setTxStatus('');
@@ -113,32 +158,49 @@ export default function AdminPage() {
       <div className="bg-gradient-to-tr from-purple-800/70 to-cyan-800/70 backdrop-blur-md rounded-3xl p-14 max-w-3xl w-full shadow-xl border border-purple-700">
         <h1 className="text-5xl font-extrabold text-white mb-12 text-center">Admin Dashboard - Create Auction</h1>
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8 text-white">
+          {/* Name */}
           <div>
             <label className="block mb-3 font-semibold text-lg">Name</label>
             <input type="text" name="name" value={formData.name} onChange={handleChange} className="w-full rounded-lg px-4 py-3 bg-slate-800" required />
           </div>
+          {/* Seller */}
           <div>
             <label className="block mb-3 font-semibold text-lg">Seller</label>
             <input type="text" name="seller" value={formData.seller} onChange={handleChange} className="w-full rounded-lg px-4 py-3 bg-slate-800" required />
           </div>
+          {/* Starting Bid */}
           <div>
             <label className="block mb-3 font-semibold text-lg">Starting Bid (ETH)</label>
             <input type="number" name="startingBid" value={formData.startingBid} onChange={handleChange} min="0" step="0.01" className="w-full rounded-lg px-4 py-3 bg-slate-800" required />
           </div>
+          {/* Duration */}
           <div>
             <label className="block mb-3 font-semibold text-lg">Duration (seconds)</label>
             <input type="number" name="duration" value={formData.duration} onChange={handleChange} min="1" className="w-full rounded-lg px-4 py-3 bg-slate-800" required />
           </div>
+          {/* Description */}
           <div className="md:col-span-2">
             <label className="block mb-3 font-semibold text-lg">Description</label>
             <textarea name="description" value={formData.description} onChange={handleChange} className="w-full rounded-lg px-4 py-3 bg-slate-800" required />
           </div>
+          {/* Image */}
+{/*           <div className="md:col-span-2">
+            <label className="block mb-3 font-semibold text-lg">Upload Image</label>
+            <input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploadingImage} required />
+            {uploadingImage && <p className="text-sm mt-2 text-cyan-400">Uploading image...</p>}
+            {formData.imageUrl && (
+              <div className="flex justify-center">
+                <img src={formData.imageUrl} alt="Preview" className="mt-4 h-48 w-48 object-cover rounded-full border-4 border-cyan-400 shadow-lg" />
+              </div>
+            )}
+          </div> */}
+          {/* Submit */}
           <div className="md:col-span-2 text-center mt-6">
             <button
               type="submit"
               disabled={!isValid || !account || !!txStatus}
               className={`w-full md:w-1/3 py-4 font-bold rounded-full shadow-lg transition-transform ${
-                isValid && account && !txStatus
+                isValid && account && !txStatus 
                   ? 'bg-gradient-to-r from-purple-600 to-cyan-600 hover:scale-105'
                   : 'bg-gray-600 text-gray-300 cursor-not-allowed'
               }`}
