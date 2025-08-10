@@ -3,10 +3,13 @@ pragma solidity ^0.8.19;
 
 contract AuctionManager {
     struct Auction {
-        address payable seller;
-        string item;
+        address payable sellerAddress;
+        string name;
+        string sellerName;
+        string description;
         uint endTime;
         uint highestBid;
+        uint startingBid;
         address payable highestBidder;
         mapping(address => uint) pendingReturns;
         bool ended;
@@ -14,20 +17,43 @@ contract AuctionManager {
 
     Auction[] private auctions;
 
-    event AuctionCreated(uint indexed auctionId, string item, uint endTime);
+    event AuctionCreated(
+        uint indexed auctionId,
+        string name,
+        string sellerName,
+        uint startingBid,
+        uint endTime,
+        string description
+    );
     event HighestBidIncreased(uint indexed auctionId, address bidder, uint amount);
     event AuctionEnded(uint indexed auctionId, address winner, uint amount);
 
-    // Create a new auction
-    function createAuction(string memory _item, uint _duration) external {
+    // Create a new auction with 5 arguments
+    function createAuction(
+        string memory _name,
+        string memory _sellerName,
+        uint _startingBid,
+        uint _duration,
+        string memory _description
+    ) external {
         require(_duration > 0, "Duration must be > 0");
 
         Auction storage auction = auctions.push();
-        auction.seller = payable(msg.sender);
-        auction.item = _item;
+        auction.sellerAddress = payable(msg.sender);
+        auction.name = _name;
+        auction.sellerName = _sellerName;
+        auction.description = _description;
+        auction.startingBid = _startingBid;
         auction.endTime = block.timestamp + _duration;
 
-        emit AuctionCreated(auctions.length - 1, _item, auction.endTime);
+        emit AuctionCreated(
+            auctions.length - 1,
+            _name,
+            _sellerName,
+            _startingBid,
+            auction.endTime,
+            _description
+        );
     }
 
     // Place a bid on an auction
@@ -37,8 +63,8 @@ contract AuctionManager {
         Auction storage auction = auctions[_auctionId];
 
         require(block.timestamp < auction.endTime, "Auction ended");
-        require(msg.value > auction.highestBid, "Bid too low");
-        require(msg.sender != auction.seller, "Seller cannot bid");
+        require(msg.value > auction.highestBid && msg.value >= auction.startingBid, "Bid too low");
+        require(msg.sender != auction.sellerAddress, "Seller cannot bid");
 
         // Refund previous highest bidder by adding to pendingReturns
         if (auction.highestBid != 0) {
@@ -61,12 +87,11 @@ contract AuctionManager {
 
         auction.pendingReturns[msg.sender] = 0;
 
-        // Use call pattern to avoid reentrancy issues
         (bool success, ) = payable(msg.sender).call{value: amount}("");
         require(success, "Withdrawal failed");
     }
 
-    // Finalize auction: transfer highest bid to seller and mark ended
+    // Finalize auction
     function endAuction(uint _auctionId) external {
         require(_auctionId < auctions.length, "Invalid auction ID");
 
@@ -78,8 +103,7 @@ contract AuctionManager {
         auction.ended = true;
 
         if (auction.highestBid > 0) {
-            // Transfer funds to seller
-            (bool success, ) = auction.seller.call{value: auction.highestBid}("");
+            (bool success, ) = auction.sellerAddress.call{value: auction.highestBid}("");
             require(success, "Transfer to seller failed");
         }
 
@@ -87,15 +111,17 @@ contract AuctionManager {
     }
 
     // View functions
-
     function getAuctionsCount() external view returns (uint) {
         return auctions.length;
     }
 
     function getAuction(uint _auctionId) external view returns (
-        address seller,
-        string memory item,
+        address sellerAddress,
+        string memory name,
+        string memory sellerName,
+        string memory description,
         uint endTime,
+        uint startingBid,
         uint highestBid,
         address highestBidder,
         bool ended
@@ -103,13 +129,23 @@ contract AuctionManager {
         require(_auctionId < auctions.length, "Invalid auction ID");
 
         Auction storage a = auctions[_auctionId];
-        return (a.seller, a.item, a.endTime, a.highestBid, a.highestBidder, a.ended);
+        return (
+            a.sellerAddress,
+            a.name,
+            a.sellerName,
+            a.description,
+            a.endTime,
+            a.startingBid,
+            a.highestBid,
+            a.highestBidder,
+            a.ended
+        );
     }
 
-    // Returns pending returns of a user for an auction
     function getPendingReturn(uint _auctionId, address _user) external view returns (uint) {
         require(_auctionId < auctions.length, "Invalid auction ID");
 
         return auctions[_auctionId].pendingReturns[_user];
     }
 }
+
