@@ -10,7 +10,6 @@ export default function AdminPage() {
     startingBid: '',
     duration: '',
     description: '',
-    imageUrl: '',
   });
 
   const [account, setAccount] = useState('');
@@ -18,7 +17,6 @@ export default function AdminPage() {
   const [provider, setProvider] = useState(null);
   const [contract, setContract] = useState(null);
   const [txStatus, setTxStatus] = useState('');
-  const [uploadingImage, setUploadingImage] = useState(false);
 
   useEffect(() => {
     if (window.ethereum) {
@@ -49,15 +47,6 @@ export default function AdminPage() {
     setIsValid(allFilled);
   }, [formData]);
 
-  // *** ADDED handleChange function ***
-  const handleChange = e => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
   const connectWallet = async () => {
     if (!window.ethereum) {
       Swal.fire('Error', 'Please install MetaMask', 'error');
@@ -72,10 +61,22 @@ export default function AdminPage() {
     }
   };
 
+  const handleChange = e => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
   const handleSubmit = async e => {
     e.preventDefault();
-    if (!contract || !provider) return Swal.fire('Error', 'Ethereum provider not initialized', 'error');
-    if (!account) return Swal.fire('Error', 'Please connect your wallet first', 'error');
+
+    if (!contract || !provider) {
+      Swal.fire('Error', 'Ethereum provider not initialized', 'error');
+      return;
+    }
+    if (!account) {
+      Swal.fire('Error', 'Please connect your wallet first', 'error');
+      return;
+    }
 
     const durationSeconds = parseInt(formData.duration, 10);
     if (isNaN(durationSeconds) || durationSeconds <= 0) {
@@ -89,14 +90,13 @@ export default function AdminPage() {
       const signer = provider.getSigner();
       const contractWithSigner = contract.connect(signer);
 
-      // Assuming contract ABI is updated: createAuction(name, seller, startingBid, duration, description, imageUrl)
+      // IMPORTANT: Only 5 arguments passed here - no imageUrl or extras
       const tx = await contractWithSigner.createAuction(
         formData.name,
-        formData.seller,
+        formData.seller, // sellerName as string
         ethers.utils.parseEther(formData.startingBid.toString()),
         durationSeconds,
-        formData.description,
-        formData.imageUrl
+        formData.description
       );
 
       await tx.wait();
@@ -109,7 +109,6 @@ export default function AdminPage() {
         startingBid: '',
         duration: '',
         description: '',
-        imageUrl: '',
       });
     } catch (err) {
       setTxStatus('');
@@ -122,6 +121,16 @@ export default function AdminPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex flex-col items-center px-10 py-20">
       <div className="bg-gradient-to-tr from-purple-800/70 to-cyan-800/70 backdrop-blur-md rounded-3xl p-14 max-w-3xl w-full shadow-xl border border-purple-700">
         <h1 className="text-5xl font-extrabold text-white mb-12 text-center">Admin Dashboard - Create Auction</h1>
+        {!account && (
+          <div className="text-center mb-8">
+            <button
+              onClick={connectWallet}
+              className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg"
+            >
+              Connect Wallet
+            </button>
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8 text-white">
           {/* Name */}
           <div>
@@ -135,9 +144,9 @@ export default function AdminPage() {
               required
             />
           </div>
-          {/* Seller */}
+          {/* Seller Name */}
           <div>
-            <label className="block mb-3 font-semibold text-lg">Seller</label>
+            <label className="block mb-3 font-semibold text-lg">Seller Name</label>
             <input
               type="text"
               name="seller"
@@ -185,19 +194,6 @@ export default function AdminPage() {
               required
             />
           </div>
-          {/* Image Upload (commented out in your code) */}
-          {/* 
-          <div className="md:col-span-2">
-            <label className="block mb-3 font-semibold text-lg">Upload Image</label>
-            <input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploadingImage} required />
-            {uploadingImage && <p className="text-sm mt-2 text-cyan-400">Uploading image...</p>}
-            {formData.imageUrl && (
-              <div className="flex justify-center">
-                <img src={formData.imageUrl} alt="Preview" className="mt-4 h-48 w-48 object-cover rounded-full border-4 border-cyan-400 shadow-lg" />
-              </div>
-            )}
-          </div> 
-          */}
           {/* Submit Button */}
           <div className="md:col-span-2 text-center mt-6">
             <button
