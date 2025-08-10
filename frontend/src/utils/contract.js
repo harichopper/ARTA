@@ -1,14 +1,16 @@
 import { ethers } from "ethers";
 
-// Replace with your deployed contract address
+// Replace with your deployed contract address (update this if you redeploy!)
 export const AUCTION_MANAGER_ADDRESS = "0x078B1D4f17BAdcdB99d2Ba5ba27d9D6835c93DCe";
 
-// ABI extracted from AuctionManager.sol
 export const AUCTION_MANAGER_ABI = [
   {
     "inputs": [
-      { "internalType": "string", "name": "_item", "type": "string" },
-      { "internalType": "uint256", "name": "_duration", "type": "uint256" }
+      { "internalType": "string", "name": "_name", "type": "string" },
+      { "internalType": "string", "name": "_sellerName", "type": "string" },
+      { "internalType": "uint256", "name": "_startingBid", "type": "uint256" },
+      { "internalType": "uint256", "name": "_duration", "type": "uint256" },
+      { "internalType": "string", "name": "_description", "type": "string" }
     ],
     "name": "createAuction",
     "outputs": [],
@@ -47,9 +49,12 @@ export const AUCTION_MANAGER_ABI = [
     "inputs": [ { "internalType": "uint256", "name": "_auctionId", "type": "uint256" } ],
     "name": "getAuction",
     "outputs": [
-      { "internalType": "address", "name": "seller", "type": "address" },
-      { "internalType": "string", "name": "item", "type": "string" },
+      { "internalType": "address", "name": "sellerAddress", "type": "address" },
+      { "internalType": "string", "name": "name", "type": "string" },
+      { "internalType": "string", "name": "sellerName", "type": "string" },
+      { "internalType": "string", "name": "description", "type": "string" },
       { "internalType": "uint256", "name": "endTime", "type": "uint256" },
+      { "internalType": "uint256", "name": "startingBid", "type": "uint256" },
       { "internalType": "uint256", "name": "highestBid", "type": "uint256" },
       { "internalType": "address", "name": "highestBidder", "type": "address" },
       { "internalType": "bool", "name": "ended", "type": "bool" }
