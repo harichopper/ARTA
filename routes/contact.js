@@ -5,7 +5,7 @@ const router = express.Router();
 
 // 🔗 Direct MongoDB connection
 mongoose.connect(
-  'mongodb+srv://<username>:<password>@cluster0.mongodb.net/contactDB?retryWrites=true&w=majority',
+  'mongodb+srv://haricdonh:hari5678@cluster0.asyp365.mongodb.net/contactDB?retryWrites=true&w=majority',
   {
     useNewUrlParser: true,
     useUnifiedTopology: true,
