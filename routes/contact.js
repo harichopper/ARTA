@@ -1,22 +1,20 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 const router = express.Router();
 
-// ✅ Connect to MongoDB (only once at startup)
-if (!mongoose.connection.readyState) {
-  mongoose.connect(process.env.MONGO_URI, {
+// 🔗 Direct MongoDB connection
+mongoose.connect(
+  'mongodb+srv://<username>:<password>@cluster0.mongodb.net/contactDB?retryWrites=true&w=majority',
+  {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-  })
-    .then(() => console.log('✅ MongoDB connected'))
-    .catch((err) => console.error('❌ MongoDB connection error:', err));
-}
+  }
+)
+  .then(() => console.log('✅ MongoDB connected'))
+  .catch((err) => console.error('❌ MongoDB connection error:', err));
 
-// ✅ Contact Schema
+// 📌 Contact Schema
 const contactSchema = new mongoose.Schema({
   name: String,
   email: String,
@@ -27,7 +25,7 @@ const contactSchema = new mongoose.Schema({
 
 const Contact = mongoose.model('Contact', contactSchema);
 
-// ✅ POST /api/contact
+// 📌 POST /api/contact
 router.post('/', async (req, res) => {
   try {
     const { name, email, subject, message } = req.body;
@@ -36,7 +34,6 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ success: false, message: 'All fields are required' });
     }
 
-    // Save to MongoDB
     const newContact = new Contact({ name, email, subject, message });
     await newContact.save();
 
@@ -50,4 +47,3 @@ router.post('/', async (req, res) => {
 });
 
 export default router;
-
