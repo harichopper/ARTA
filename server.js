@@ -5,26 +5,20 @@ import mongoose from 'mongoose';
 const app = express();
 const port = process.env.PORT || 5000;
 
+// ✅ Middleware
 app.use(cors());
 app.use(express.json());
 
-// ✅ MongoDB Connection
+// ✅ MongoDB Connection (Direct URI)
 mongoose.connect(
-  'mongodb+srv://haricdonh:hari5678@cluster0.asyp365.mongodb.net/',
+  'mongodb+srv://haricdonh:hari5678@cluster0.asyp365.mongodb.net/contactDB?retryWrites=true&w=majority',
   {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   }
-);
-
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, '❌ MongoDB connection error:'));
-db.once('open', () => console.log('✅ Connected to MongoDB'));
-
-// 🔹 Root Route
-app.get('/', (req, res) => {
-  res.send('Backend is running!');
-});
+)
+  .then(() => console.log('✅ Connected to MongoDB'))
+  .catch(err => console.error('❌ MongoDB connection error:', err));
 
 // ======================
 // USER MODEL & ROUTES
@@ -36,14 +30,17 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
-// Seed user (optional)
-app.post('/api/seed-user', async (req, res) => {
+// Seed user
+app.post('/api/users/seed', async (req, res) => {
   try {
     const { walletAddress, role } = req.body;
     const user = new User({ walletAddress: walletAddress.toLowerCase(), role });
     await user.save();
     res.json({ message: 'User seeded', user });
   } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({ error: 'Wallet address already exists' });
+    }
     res.status(500).json({ error: error.message });
   }
 });
@@ -57,7 +54,7 @@ app.get('/api/users/:walletAddress', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
     res.json(user);
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -94,6 +91,13 @@ app.post('/api/contact', async (req, res) => {
     console.error('❌ Error saving contact form:', error);
     res.status(500).json({ success: false, message: 'Server error' });
   }
+});
+
+// ======================
+// ROOT ROUTE
+// ======================
+app.get('/', (req, res) => {
+  res.send('Backend is running!');
 });
 
 // ======================
