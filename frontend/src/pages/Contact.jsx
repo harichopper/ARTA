@@ -21,11 +21,12 @@ export default function Contact() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch( 'https://arta-frontend-65ui.vercel.app', {
+      const response = await fetch('https://arta-frontend-65ui.vercel.app/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
+        
 
       if (!response.ok) throw new Error('Failed to send message');
 
