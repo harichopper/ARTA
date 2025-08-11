@@ -1,3 +1,5 @@
+// api/contact.js  <-- Put this inside the "api" folder for Vercel
+
 import mongoose from 'mongoose';
 import cors from 'cors';
 import express from 'express';
@@ -6,19 +8,23 @@ const app = express();
 
 // ✅ CORS setup — allow your frontend domain
 app.use(cors({
-  origin: 'https://arta-frontend-hcl1.vercel.app', // your deployed frontend
+  origin: 'https://arta-frontend-65ui.vercel.app', // ✅ change to your real frontend URL
   methods: ['POST', 'OPTIONS'],
 }));
 app.use(express.json());
 
-// ✅ MongoDB connection (direct URI)
+// ✅ MongoDB connection (only connect once in serverless)
 const MONGODB_URI = 'mongodb+srv://haricdonh:hari5678@cluster0.asyp365.mongodb.net/contactDB?retryWrites=true&w=majority';
 
-if (!mongoose.connection.readyState) {
+if (!global._mongooseConnected) {
   mongoose.connect(MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-  }).then(() => console.log('✅ MongoDB connected'))
+  })
+    .then(() => {
+      console.log('✅ MongoDB connected');
+      global._mongooseConnected = true;
+    })
     .catch((err) => console.error('❌ MongoDB connection error:', err));
 }
 
@@ -34,6 +40,13 @@ const contactSchema = new mongoose.Schema({
 const Contact = mongoose.models.Contact || mongoose.model('Contact', contactSchema);
 
 // 📌 Route
+app.options('/api/contact', (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', 'https://arta-frontend-65ui.vercel.app');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  return res.status(200).end();
+});
+
 app.post('/api/contact', async (req, res) => {
   try {
     const { name, email, subject, message } = req.body;
@@ -54,5 +67,5 @@ app.post('/api/contact', async (req, res) => {
   }
 });
 
-// ✅ Export as Vercel serverless function
+// ✅ Export for Vercel
 export default app;
